@@ -1,11 +1,11 @@
 #-------------------------------------------------------------------#
-#                    Bare Ground ~ Insect Abundance                 #
+#              Vegetation Abundance ~ Insect Abundance              #
 #-------------------------------------------------------------------#
 
-#Research Question: How does the presence/absence of bare ground within the study area influence insect abundance?
+#Research Question: How does the abundance of vegetation within the study area influence insect abundance?
 
 #Objectives:
-#Create model(s) to explore relationship between bare ground abundance and insect abundance
+#Create model(s) to explore relationship between vegetation abundance and insect abundance
 #Use created model(s) to visualize the relationship graphically
 
 #Clear environment and set working directory
@@ -44,29 +44,26 @@ InsectAbundance <- Insects %>%
   summarise(Abundance = sum(Abundance)) %>%
   arrange(Date)
 
-#Calculate average bare ground coverage at each site on each date.
-AverageBG <- Vegetation %>%
-  select(Date, Site, Quadrat, BG) %>%
-  group_by(Date, Site, Quadrat) %>%
-  summarise(BG = BG[1]) %>%
+#Calculate average vegetation cover at each site on each date
+AverageVA <- Vegetation %>%
+  select(Site, Date, Cover) %>%
   group_by(Date, Site) %>%
-  summarise(AverageBG = mean(BG),
-            NumberQuadrats = length(BG))
+  summarise(AverageVegCover = sum(Cover)/10)
 
 #Join the two datasets together
-BGonIA <- full_join(InsectAbundance, AverageBG, by = c("Date", "Site"))
+VAonIA <- full_join(InsectAbundance, AverageVA, by = c("Date", "Site"))
 
-#Model for insect abundance predicted by bare ground
-BGonIAmodel <- glm(Abundance ~ AverageBG + Site + Date,
-                       family = poisson,
-                       data = BGonIA)
-summary(BGonIAmodel)
+#Model for insect abundance predicted by vegetation cover
+VAonIAmodel <- glm(Abundance ~ AverageVegCover + Site + Date,
+                   family = poisson,
+                   data = VAonIA)
+summary(VAonIAmodel)
 
 #Find intercept and slope to plot best fit line on graph
-coef(BGonIAmodel)
+coef(VAonIAmodel)
 
 #Morgan's plot: Percent Bare Ground vs. Bee Abundance plot using ggplot2
-BGonIAplot <- ggplot(BGonIA, aes(x = AverageBG,
+VAonIAplot <- ggplot(VAonIA, aes(x = AverageVegCover,
                                  y = Abundance)) +
   geom_point(aes(shape = Site,
                  color = Site),
@@ -76,11 +73,11 @@ BGonIAplot <- ggplot(BGonIA, aes(x = AverageBG,
               color = "black",
               size = 0.5) +
   theme_bw() +
-  labs(x = "Bare Ground (%)",
+  labs(x = "Vegetation Cover (%)",
        y = "Arthropod Abundance") +
-  ggtitle("Influence of Bare Ground on Arthropod Abundance") +
+  ggtitle("Influence of Vegetation Cover on Arthropod Abundance") +
   theme(plot.title = element_text(size = 15,
                                   face = "bold",
                                   hjust = 0.5)) +
   theme(legend.text = element_text(size = 10))
-BGonIAplot
+VAonIAplot

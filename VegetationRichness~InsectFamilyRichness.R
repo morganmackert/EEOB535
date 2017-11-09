@@ -1,11 +1,11 @@
 #-------------------------------------------------------------------#
-#                    Bare Ground ~ Insect Abundance                 #
+#           Vegetation Richness ~ Insect Family Richness            #
 #-------------------------------------------------------------------#
 
-#Research Question: How does the presence/absence of bare ground within the study area influence insect abundance?
+#Research Question: How does the number of plant species within the study area influences arthropod family richness?
 
 #Objectives:
-#Create model(s) to explore relationship between bare ground abundance and insect abundance
+#Create model(s) to explore relationship between vegetation richness and arthropod family richness
 #Use created model(s) to visualize the relationship graphically
 
 #Clear environment and set working directory
@@ -14,6 +14,8 @@ setwd("~/ISU/Semester 5/Restoration Ecology/Paper/Data")
 
 #Load libraries
 library(lubridate)
+library(tidyr)
+library(vegan)
 library(dplyr)
 library(ggplot2)
 
@@ -35,39 +37,41 @@ Vegetation <- read.csv("Vegetation.csv")
 Insects$Date <- mdy(Insects$Date)
 Vegetation$Date <- mdy(Vegetation$Date)
 
-#Determine total insect abundance for each site on each date
-Insects$Abundance <- rowSums(Insects[3:19])
+#Convert from wide to long format
+InsectsLong <- gather(Insects, Family, Abundance, Apoidea:Chrysopidae, factor_key = TRUE)
 
-#Sum number of specimens collected for each date at each site
-InsectAbundance <- Insects %>%
+#In order to find family richness for each treatment, need to determine presence/absence of each family within each treatment.
+InsectsPresAbs <- decostand(InsectsLong[4], method = "pa")
+
+#Paste presence/absence column into long dataset
+InsectsLong$PresAbs <- InsectsPresAbs$Abundance
+
+#Group by Site and Date and sum PresAbs to determine family richness
+InsectFamRich <- InsectsLong %>%
   group_by(Site, Date) %>%
-  summarise(Abundance = sum(Abundance)) %>%
+  summarise(FamRich = sum(PresAbs)) %>%
   arrange(Date)
 
-#Calculate average bare ground coverage at each site on each date.
-AverageBG <- Vegetation %>%
-  select(Date, Site, Quadrat, BG) %>%
-  group_by(Date, Site, Quadrat) %>%
-  summarise(BG = BG[1]) %>%
+#Determine vegetation species richness for each site on each date
+VegRich <- Vegetation %>%
   group_by(Date, Site) %>%
-  summarise(AverageBG = mean(BG),
-            NumberQuadrats = length(BG))
+  summarise(VegRich = n_distinct(Scientific.Name))
 
 #Join the two datasets together
-BGonIA <- full_join(InsectAbundance, AverageBG, by = c("Date", "Site"))
+VRonIR <- full_join(InsectFamRich, VegRich, by = c("Date", "Site"))
 
-#Model for insect abundance predicted by bare ground
-BGonIAmodel <- glm(Abundance ~ AverageBG + Site + Date,
-                       family = poisson,
-                       data = BGonIA)
-summary(BGonIAmodel)
+#Model for insect family richness predicted by vegetation richness
+VRonIRmodel <- glm(FamRich ~ VegRich + Site + Date,
+                   family = poisson,
+                   data = VRonIR)
+summary(VRonIRmodel)
 
 #Find intercept and slope to plot best fit line on graph
-coef(BGonIAmodel)
+coef(VRonIRmodel)
 
-#Morgan's plot: Percent Bare Ground vs. Bee Abundance plot using ggplot2
-BGonIAplot <- ggplot(BGonIA, aes(x = AverageBG,
-                                 y = Abundance)) +
+#Plot model to view relationship graphically
+VRonIRplot <- ggplot(VRonIR, aes(x = VegRich,
+                                 y = FamRich)) +
   geom_point(aes(shape = Site,
                  color = Site),
              size = 3) +
@@ -76,11 +80,11 @@ BGonIAplot <- ggplot(BGonIA, aes(x = AverageBG,
               color = "black",
               size = 0.5) +
   theme_bw() +
-  labs(x = "Bare Ground (%)",
-       y = "Arthropod Abundance") +
-  ggtitle("Influence of Bare Ground on Arthropod Abundance") +
+  labs(x = "Number of Plant Species",
+       y = "Number of Arthropod Families") +
+  ggtitle("Influence of Vegetation Richness on \nArthropod Family Richness") +
   theme(plot.title = element_text(size = 15,
                                   face = "bold",
                                   hjust = 0.5)) +
   theme(legend.text = element_text(size = 10))
-BGonIAplot
+VRonIRplot
