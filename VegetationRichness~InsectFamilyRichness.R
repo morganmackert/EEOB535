@@ -2,7 +2,7 @@
 #           Vegetation Richness ~ Insect Family Richness            #
 #-------------------------------------------------------------------#
 
-#Research Question: How does the number of plant species within the study area influences arthropod family richness?
+#Research Question: How does the number of plant species within the study area influence arthropod family richness?
 
 #Objectives:
 #Create model(s) to explore relationship between vegetation richness and arthropod family richness
