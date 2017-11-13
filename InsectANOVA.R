@@ -6,7 +6,6 @@
 
 #Objectives:
 #Perform an ANOVA on the three landuse categories to determine significant differences between insect compositions
-#Create graph to visualize the information
 
 #Clear environment and set working directory
 rm(list=ls())
