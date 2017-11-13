@@ -57,9 +57,8 @@ AverageBG <- Vegetation %>%
 BGonIA <- full_join(InsectAbundance, AverageBG, by = c("Date", "Site"))
 
 #Model for insect abundance predicted by bare ground
-BGonIAmodel <- glm(Abundance ~ AverageBG + Site + Date,
-                       family = poisson,
-                       data = BGonIA)
+BGonIAmodel <- lm(Abundance ~ AverageBG + Site + Date,
+                   data = BGonIA)
 summary(BGonIAmodel)
 
 #Find intercept and slope to plot best fit line on graph

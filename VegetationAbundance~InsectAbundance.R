@@ -54,8 +54,7 @@ AverageVA <- Vegetation %>%
 VAonIA <- full_join(InsectAbundance, AverageVA, by = c("Date", "Site"))
 
 #Model for insect abundance predicted by vegetation cover
-VAonIAmodel <- glm(Abundance ~ AverageVegCover + Site + Date,
-                   family = poisson,
+VAonIAmodel <- lm(Abundance ~ AverageVegCover + Site + Date,
                    data = VAonIA)
 summary(VAonIAmodel)
 

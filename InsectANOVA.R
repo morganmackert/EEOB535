@@ -42,6 +42,11 @@ InsectFamRich <- InsectsLong %>%
   summarise(FamRich = sum(PresAbs)) %>%
   arrange(Date)
 
+#Group by Site to determine family richness at each location
+InsectFamRichbySite <- InsectsLong %>%
+  group_by(Site) %>%
+  summarise(FamRich = sum(PresAbs))
+
 #Determine total insect abundance for each site on each date
 Insects$Abundance <- rowSums(Insects[3:19])
 
