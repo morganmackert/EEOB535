@@ -61,8 +61,7 @@ VegRich <- Vegetation %>%
 VRonIR <- full_join(InsectFamRich, VegRich, by = c("Date", "Site"))
 
 #Model for insect family richness predicted by vegetation richness
-VRonIRmodel <- glm(FamRich ~ VegRich + Site + Date,
-                   family = poisson,
+VRonIRmodel <- lm(FamRich ~ VegRich,
                    data = VRonIR)
 summary(VRonIRmodel)
 

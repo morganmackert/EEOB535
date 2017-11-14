@@ -53,18 +53,34 @@ AverageBG <- Vegetation %>%
   summarise(AverageBG = mean(BG),
             NumberQuadrats = length(BG))
 
-#Join the two datasets together
+#Convert from wide to long format
+InsectsLong <- gather(Insects, Family, Abundance, Apoidea:Chrysopidae, factor_key = TRUE)
+
+#In order to find family richness for each treatment, need to determine presence/absence of each family within each treatment.
+InsectsPresAbs <- decostand(InsectsLong[4], method = "pa")
+
+#Paste presence/absence column into long dataset
+InsectsLong$PresAbs <- InsectsPresAbs$Abundance
+
+#Group by Site and Date and sum PresAbs to determine family richness
+InsectFamRich <- InsectsLong %>%
+  group_by(Site, Date) %>%
+  summarise(FamRich = sum(PresAbs)) %>%
+  arrange(Date)
+
+#Join datasets together
 BGonIA <- full_join(InsectAbundance, AverageBG, by = c("Date", "Site"))
+BGonIR <- full_join(InsectFamRich, AverageBG, by = c("Date", "Site"))
 
 #Model for insect abundance predicted by bare ground
-BGonIAmodel <- lm(Abundance ~ AverageBG + Site + Date,
+BGonIAmodel <- lm(Abundance ~ AverageBG,
                    data = BGonIA)
 summary(BGonIAmodel)
 
 #Find intercept and slope to plot best fit line on graph
 coef(BGonIAmodel)
 
-#Morgan's plot: Percent Bare Ground vs. Bee Abundance plot using ggplot2
+#Percent Bare Ground vs. Bee Abundance plot using ggplot2
 BGonIAplot <- ggplot(BGonIA, aes(x = AverageBG,
                                  y = Abundance)) +
   geom_point(aes(shape = Site,
@@ -83,3 +99,28 @@ BGonIAplot <- ggplot(BGonIA, aes(x = AverageBG,
                                   hjust = 0.5)) +
   theme(legend.text = element_text(size = 10))
 BGonIAplot
+
+#Model for insect family richness predicted by bare ground
+BGonIRmodel <- lm(FamRich ~ AverageBG,
+                  data = BGonIR)
+summary(BGonIRmodel)
+
+#Percent Bare Ground vs. Insect Family Richness plot using ggplot2
+BGonIRplot <- ggplot(BGonIR, aes(x = AverageBG,
+                                 y = FamRich)) +
+  geom_point(aes(shape = Site,
+                 color = Site),
+             size = 3) +
+  geom_smooth(method = "glm",
+              se = FALSE,
+              color = "black",
+              size = 0.5) +
+  theme_bw() +
+  labs(x = "Bare Ground (%)",
+       y = "Number of Arthropod Families") +
+  ggtitle("Influence of Bare Ground on Arthropod Family Richness") +
+  theme(plot.title = element_text(size = 15,
+                                  face = "bold",
+                                  hjust = 0.5)) +
+  theme(legend.text = element_text(size = 10))
+BGonIRplot

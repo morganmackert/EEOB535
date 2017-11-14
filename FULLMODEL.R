@@ -134,6 +134,19 @@ autoplot(Fulldata.PCA,
          frame.type = "norm") +
   theme_bw()
 
+fviz_pca_ind(Fulldata.PCA,
+             geom.ind = "point",
+             pointsize = 3,
+             col.ind = Fulldata$Site,
+             palette = "aaas",
+             #palette = c("#00AFBB", "#E7B800", "#FC4E07"),
+             addEllipses = TRUE,
+             ellipse.type = "confidence",
+             ellipse.level = 0.95,
+             xlab = "PC1 (51.8%)",
+             ylab = "PC2 (30.8%)",
+             mean.point = FALSE)
+
 #-------------------------------------------------------------------#
 #                              Models                               #
 #-------------------------------------------------------------------#
