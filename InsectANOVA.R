@@ -58,9 +58,6 @@ InsectAbundance <- Insects %>%
 FamRichAOV <- aov(FamRich ~ Site, InsectFamRich)
 summary(FamRichAOV)
 
-#Inverse Simpson Diversity on family richness
-diversity(InsectFamRich$InsectFamRich, "simpson")
-
 #Do ANOVA on overall abundance
 AbundanceAOV <- aov(Abundance ~ Site, InsectAbundance)
 summary(AbundanceAOV)
