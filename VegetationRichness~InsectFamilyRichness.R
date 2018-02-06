@@ -76,13 +76,11 @@ summary(VRonIRmodelwithSite)
 #Plot model to view relationship graphically
 VRonIRplot <- ggplot(VRonIR, aes(x = VegRich,
                                  y = FamRich,
-                                 group = Site)) +
-  geom_point(aes(shape = Site,
-                 color = Site),
+                                 colour = Site)) +
+  geom_point(aes(shape = Site),
              size = 3) +
   geom_smooth(method = "glm",
               se = FALSE,
-              color = "black",
               size = 0.5) +
   theme_bw() +
   labs(x = "Number of Plant Species",
