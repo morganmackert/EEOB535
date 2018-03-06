@@ -57,8 +57,35 @@ VegRich <- Vegetation %>%
   group_by(Date, Site) %>%
   summarise(VegRich = length(unique(Scientific.Name)))
 
-#Join the two datasets together
+#Determine which species are present in each site
+VegSpp <- Vegetation %>%
+  group_by(Date, Site) %>%
+  filter(Common.Name != "Dead litter") %>%
+  count(Common.Name)
+
+#Classify each vegetation species as native or introduced
+VegSpp <- VegSpp %>%
+  mutate(Classification = case_when(
+    Common.Name == "Giant foxtail" | Common.Name == "Yellow foxtail" | Common.Name == "Creeping Charlie" | Common.Name == "Dandelion" | Common.Name == "Corn" | Common.Name == "Green foxtail" | Common.Name == "Brome grass" | Common.Name == "Canada thistle" | Common.Name == "Velvet leaf" | Common.Name == "Musk thistle" | Common.Name == "Queen Anne's lace" ~ "Introduced",
+    Common.Name == "Big bluestem" | Common.Name == "Black eyed Susan" | Common.Name == "Culver's root" | Common.Name == "Elm" | Common.Name == "Gray-headed coneflower" | Common.Name == "Indian grass" | Common.Name == "Little bluestem" | Common.Name == "Marestail" | Common.Name == "Pale gentian" | Common.Name == "Partridge pea" | Common.Name == "Pennsylvania smart weed" | Common.Name == "Rattlesnake master" | Common.Name == "Red mulberry" | Common.Name == "Round headed bush clover" | Common.Name == "Showy tick trefoil" | Common.Name == "Side oats grama" | Common.Name == "Sugar maple" | Common.Name == "Switchgrass" | Common.Name == "Waterhemp" | Common.Name == "Wild grape" | Common.Name == "Wild white indigo" ~ "Native"
+  ))
+
+#Determine number of native/introduced species for each site
+NatIntro <- VegSpp %>%
+  group_by(Date, Site) %>%
+  count(Classification)
+
+#Determine number of native/introduced species observations for each site
+NatIntroObs <- Vegetation %>%
+  group_by(Site, Date) %>%
+  filter(Native.Introduced != "") %>%
+  count(Native.Introduced)
+
+#Join InsectFamRich and VegRich datasets together
 VRonIR <- full_join(InsectFamRich, VegRich, by = c("Date", "Site"))
+
+#Join NatIntro and InsectFamRich together
+NIonIR <- full_join(NatIntroObs, InsectFamRich, by = c("Date", "Site"))
 
 #Model for insect family richness predicted by vegetation richness
 VRonIRmodel <- glm(FamRich ~ VegRich + Date,
@@ -91,3 +118,39 @@ VRonIRplot <- ggplot(VRonIR, aes(x = VegRich,
                                   hjust = 0.5)) +
   theme(legend.text = element_text(size = 10))
 VRonIRplot
+
+#Graph native/introduced species observations by site
+NatIntroObsplot <- ggplot(NatIntroObs, aes(x = Site,
+                                      y = n,
+                                      fill = Native.Introduced)) +
+  geom_bar(stat = "identity",
+           position = "dodge") +
+  geom_smooth(method = "glm",
+              se = FALSE,
+              size = 0.5) +
+  theme_bw() +
+  labs(x = "Site",
+       y = "Number of Observations") +
+  theme(plot.title = element_text(size = 15,
+                                  face = "bold",
+                                  hjust = 0.5)) +
+  theme(legend.text = element_text(size = 10))
+NatIntroObsplot
+
+#Graph number of native/introduced species by site
+NatIntroplot <- ggplot(NatIntro, aes(x = Site,
+                                     y = nn,
+                                     fill = Classification)) +
+  geom_bar(stat = "identity",
+           position = "dodge") +
+  geom_smooth(method = "glm",
+              se = FALSE,
+              size = 0.5) +
+  theme_bw() +
+  labs(x = "Site",
+       y = "Number of Species") +
+  theme(plot.title = element_text(size = 15,
+                                  face = "bold",
+                                  hjust = 0.5)) +
+  theme(legend.text = element_text(size = 10))
+NatIntroplot

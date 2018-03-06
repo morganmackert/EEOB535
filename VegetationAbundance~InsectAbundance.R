@@ -48,7 +48,7 @@ InsectAbundance <- Insects %>%
 AverageVA <- Vegetation %>%
   select(Site, Date, Cover) %>%
   group_by(Date, Site) %>%
-  summarise(AverageVegCover = sum(Cover)/10)
+  summarise(AverageVegCover = sum(Cover)/5)
 
 #Join the two datasets together
 VAonIA <- full_join(InsectAbundance, AverageVA, by = c("Date", "Site"))

@@ -15,6 +15,8 @@ setwd("~/ISU/Semester 5/Restoration Ecology/Paper/Data")
 #Load libraries
 library(lubridate)
 library(dplyr)
+library(tidyr)
+library(vegan)
 library(ggplot2)
 
 #Read in data
@@ -73,7 +75,7 @@ BGonIA <- full_join(InsectAbundance, AverageBG, by = c("Date", "Site"))
 BGonIR <- full_join(InsectFamRich, AverageBG, by = c("Date", "Site"))
 
 #Model for insect abundance predicted by bare ground
-BGonIAmodel <- lm(Abundance ~ AverageBG,
+BGonIAmodel <- lm(Abundance ~ AverageBG, + Date,
                    data = BGonIA)
 summary(BGonIAmodel)
 
