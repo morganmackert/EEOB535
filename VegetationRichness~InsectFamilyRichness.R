@@ -121,8 +121,8 @@ VRonIRplot
 
 #Graph native/introduced species observations by site
 NatIntroObsplot <- ggplot(NatIntroObs, aes(x = Site,
-                                      y = n,
-                                      fill = Native.Introduced)) +
+                                           y = n,
+                                           fill = Native.Introduced)) +
   geom_bar(stat = "identity",
            position = "dodge") +
   geom_smooth(method = "glm",
@@ -134,7 +134,8 @@ NatIntroObsplot <- ggplot(NatIntroObs, aes(x = Site,
   theme(plot.title = element_text(size = 15,
                                   face = "bold",
                                   hjust = 0.5)) +
-  theme(legend.text = element_text(size = 10))
+  theme(legend.text = element_text(size = 10)) +
+  labs(fill = "Classification")
 NatIntroObsplot
 
 #Graph number of native/introduced species by site
